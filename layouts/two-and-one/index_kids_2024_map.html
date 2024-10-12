@@ -370,48 +370,48 @@
 
 							<span style="display:inline-block;">
 								<label class="switch">
-									<input type="checkbox" checked="true" id="chkLot">
+									<input type="checkbox" checked="true" id="chk2_5">
 									<span class="slider" id="slider2_5"></span>
 								</label>
-								<span class="en" id="sliderTxt">Lot Condition</span>
+								<span class="en" id="sliderTxt">2 - 5 YEARS</span>
 							</span>
 							<br />
 
 							<span style="display:inline-block;">
 								<label class="switch">
-									<input type="checkbox" checked="true" id="chkIllegalDumping">
+									<input type="checkbox" checked="true" id="chk3_5">
 									<span class="slider" id="slider3_5"></span>
 								</label>
-								<span class="en" id="sliderTxt">Illegal Dumping</span>
+								<span class="en" id="sliderTxt">3 - 5 YEARS</span>
 							</span>
 							<br />
 
 							<span style="display:inline-block;">
 								<label class="switch">
-									<input type="checkbox" checked="true" id="chkDirty">
+									<input type="checkbox" checked="true" id="chk6_16">
 									<span class="slider" id="slider6_16"></span>
 								</label>
-								<span class="en" id="sliderTxt">Dirty Condition</span>
+								<span class="en" id="sliderTxt">6 - 16 YEARS</span>
 							</span>
 							<br />
 
 							<span style="display:inline-block;">
 								<label class="switch">
-									<input type="checkbox" id="chkObstruction">
+									<input type="checkbox" id="chk0_16">
 									<span class="slider" id="slider0_16"></span>
 								</label>
-								<span class="en" id="sliderTxt">Obstruction</span>
+								<span class="en" id="sliderTxt">0 - 16 YEARS</span>
 							</span>
 							<br />
 
 
-							<span style="display:inline-block;">
+							<!-- <span style="display:inline-block;">
 								<label class="switch">
 									<input type="checkbox" id="chkOther">
 									<span class="slider" id="sliderOther"></span>
 								</label>
 								<span class="en" id="sliderTxt">Other Complaints</span>
-							</span>
+							</span> -->
 							<br />
 						</div>
 					</div>
@@ -483,7 +483,7 @@
 				table_map = [],
 				filteredData,
 				latLngs = [],
-				pointsOverlayComplaint,
+				pointsOverlayCenter,
 				legendShed,
 				legendCD,
 				cat,
@@ -497,8 +497,8 @@
 
 			function ready() {
 
-				pointsOverlayComplaint = L.d3SvgOverlay(function (sel, proj) {
-					var pointUpdComplaint = sel.selectAll('circle').data(points);
+				pointsOverlayCenter = L.d3SvgOverlay(function (sel, proj) {
+					var pointUpdCenter = sel.selectAll('circle').data(points);
 
 					function pendVal(pend) {
 						if (pend == 'Y') {
@@ -507,12 +507,12 @@
 							return 'FALSE'
 						}
 					}
-					pointUpdComplaint.enter()
+					pointUpdCenter.enter()
 						.append('circle')
 						.attr('cx', function (d) { return proj.latLngToLayerPoint(d.latLng).x; })
 						.attr('cy', function (d) { return proj.latLngToLayerPoint(d.latLng).y; })
 						.attr('class', function (d) {
-							switch (d.complaintType) {
+							switch (d.ageRange) {
 								case 'Graffiti':
 									return 'point0_2';
 									break;
@@ -546,7 +546,7 @@
 									'CREATED DATE: ' + d.createdDate + '</br>' +
 									'CLOSED DATE: ' + d.closedDate + '</br>' +
 									'DUE DATE: ' + d.dueDate + '</br>' +
-									'COMPLAINT TYPE: ' + d.complaintType + ' ' + d.complaintOtherType + '</br>' +
+									'COMPLAINT TYPE: ' + d.ageRange + ' ' + d.complaintOtherType + '</br>' +
 									'COMPLAINT DETAILS: ' + d.descriptor + '</br>'
 									// 'AVG DAYS TO CLOSE: ' + d.daysToClose + '</br>' +
 									//'DAYS SINCE CREATION: ' + d.duration
@@ -576,92 +576,92 @@
 							return tooltipFacades.transition().delay(500).style("visibility", "hidden");
 						});
 
-					pointUpdComplaint.attr("stroke-width", 1 / proj.scale);
-					pointUpdComplaint.attr("r", 5 / proj.scale);
+					pointUpdCenter.attr("stroke-width", 1 / proj.scale);
+					pointUpdCenter.attr("r", 5 / proj.scale);
 
 
 
-					var graffitiSlider = document.querySelector('input[id="chk0_2"]');
-					lotSlider = document.querySelector('input[id="chkLot"]');
-					illegalDumpingSlider = document.querySelector('input[id="chkIllegalDumping"]');
-					dirtySlider = document.querySelector('input[id="chkDirty"]');
-					obstructionSlider = document.querySelector('input[id="chkObstruction');
-					otherSlider = document.querySelector('input[id="chkOther"]');
+					var s0_2Slider = document.querySelector('input[id="chk0_2"]');
+					s2_5Slider = document.querySelector('input[id="chk2_5"]');
+					s3_5Slider = document.querySelector('input[id="chk3_5"]');
+					s6_16Slider = document.querySelector('input[id="chk6_16"]');
+					s0_16Slider = document.querySelector('input[id="chk0_16');
+					<!-- otherSlider = document.querySelector('input[id="chkOther"]'); -->
 
-					graffitiSlider.onchange = function () {
+					s0_2Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.complaintType == "Graffiti";
+								return d.ageRange == "Graffiti";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.complaintType == "Graffiti";
+								return d.ageRange == "Graffiti";
 							})
 								.style("display", "none");
 
 						}
 					};
 
-					lotSlider.onchange = function () {
+					s2_5Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.complaintType == "Lot Condition";
+								return d.ageRange == "Lot Condition";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.complaintType == "Lot Condition";
+								return d.ageRange == "Lot Condition";
 							})
 								.style("display", "none");
 
 						}
 					};
 
-					illegalDumpingSlider.onchange = function () {
+					s3_5Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".pointIllegalDumping").filter(function (d) {
-								return d.complaintType == "Illegal Dumping";
+								return d.ageRange == "Illegal Dumping";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".pointIllegalDumping").filter(function (d) {
-								return d.complaintType == "Illegal Dumping";
+								return d.ageRange == "Illegal Dumping";
 							})
 								.style("display", "none");
 
 						}
 					};
 
-					dirtySlider.onchange = function () {
+					s6_16Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.complaintType == "Dirty Condition";
+								return d.ageRange == "Dirty Condition";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.complaintType == "Dirty Condition";
+								return d.ageRange == "Dirty Condition";
 							})
 								.style("display", "none");
 
 						}
 					};
 
-					obstructionSlider.onchange = function () {
+					s0_16Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.complaintType == "Obstruction";
+								return d.ageRange == "Obstruction";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.complaintType == "Obstruction";
+								return d.ageRange == "Obstruction";
 							})
 								.style("display", "none");
 
@@ -671,13 +671,13 @@
 					otherSlider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".pointOther").filter(function (d) {
-								return d.complaintType == "Other";
+								return d.ageRange == "Other";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".pointOther").filter(function (d) {
-								return d.complaintType == "Other";
+								return d.ageRange == "Other";
 							})
 								.style("display", "none");
 
@@ -707,7 +707,7 @@
 						return d;
 					});
 
-					pointsOverlayComplaint.addTo(map);
+					pointsOverlayCenter.addTo(map);
 
 					d3.selectAll(".point0_2").style("display", "block");
 					d3.selectAll(".point2_5").style("display", "block");
