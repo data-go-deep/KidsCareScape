@@ -356,7 +356,8 @@
 						<svg></svg>
 						<div id="ui-container" class="ui" style="z-index: 401">
 							<h5><b>CHILDCARE CENTERS IN NYC</b></h5>
-							<h6>(TOOGLE YOUR CRITERIA ON & OFF)</h6>
+							<h6>(TOOGLE TO SELECT)</h6>
+							<h5>AGE RANGE: </h5>
 
 							<span style="display:inline-block;">
 								<label class="switch">
@@ -456,10 +457,18 @@
 			L.Control.include({
 				_refocusOnMap: L.Util.falseFn // Do nothing.
 			});
+			L.Control.prototype._refocusOnMap = function _refocusOnMap(ev) {
+				// if map exists and event is not a keyboard event
+				if (this._map && ev && ev.screenX > 0 && ev.screenY > 0) {
+					this._map.getContainer().focus({ preventScroll: true });
+				}
+			};
+			
 			var map = L.map('map', {
 				dragging: true,
 				scrollWheelZoom: false
 			}).setView([40.72215448921957, -73.98616799064006], 11);
+			
 			L.tileLayer('http://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}', {
 				maxZoom: 20,
 				subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
@@ -513,24 +522,22 @@
 						.attr('cy', function (d) { return proj.latLngToLayerPoint(d.latLng).y; })
 						.attr('class', function (d) {
 							switch (d.ageRange) {
-								case 'Graffiti':
+								case '0 YEARS - 2 YEARS':
 									return 'point0_2';
 									break;
-								case 'Lot Condition':
+								case '2 YEARS - 5 YEARS':
 									return 'point2_5';
 									break;
-								case 'Illegal Dumping':
-									return 'pointIllegalDumping';
+								case '3 YEARS - 5 YEARS':
+									return 'point3_5';
 									break;
-								case 'Dirty Condition':
+								case '6 YEARS - 16 YEARS':
 									return 'point6_16';
 									break;
-								case 'Obstruction':
+								case '0 YEARS - 16 YEARS':
 									return 'point0_16';
 									break;
-								case 'Other':
-									return 'pointOther';
-									break;
+								
 							}
 						})
 
@@ -539,18 +546,21 @@
 							if (d3.select(this).style("fill-opacity") != 0) {
 								tooltipFacades.style("visibility", "visible");
 								tooltipFacades.html(
+									'CENTER NAME: ' + d.name + '</br>' +
+									'WEB SITE : <a href="https://'+ d.link + '" target="_blank">' + d.link +'</a></br>'+
+							//		'WEB SITE (if any): ' + d.link + '</br>' + 
+							//		'PHONE: ' + d.phone + '</br>' +
+									'PHONE : <a href="tel:'+ d.phone + '">' + d.phone +'</a></br>'+
 									'ADDRESS: ' + d.address + '</br>' +
-									'BOROUGH: ' + d.Borough + '</br>' +
 									'COMMUNITY BOARD: ' + (d.communityBoard).toUpperCase() + '</br>' +
-									'COMPLAINT STATUS: ' + d.status + '</br>' +
-									'CREATED DATE: ' + d.createdDate + '</br>' +
-									'CLOSED DATE: ' + d.closedDate + '</br>' +
-									'DUE DATE: ' + d.dueDate + '</br>' +
-									'COMPLAINT TYPE: ' + d.ageRange + ' ' + d.complaintOtherType + '</br>' +
-									'COMPLAINT DETAILS: ' + d.descriptor + '</br>'
-									// 'AVG DAYS TO CLOSE: ' + d.daysToClose + '</br>' +
-									//'DAYS SINCE CREATION: ' + d.duration
-								)
+									'AGE RANGE: ' + d.ageRange + '</br>' +
+									'PROGRAM TYPE: ' + d.programType + '</br>' +
+									'CHILD CARE TYPE: ' + d.childCareType + '</br>' +
+									'TOTAL WORKERS: ' + d.worker + '</br>' +
+									'VIOLATION RATE: ' + d.violationRate + '</br>' +
+									'CRITICAL VIOLATION RATE: ' + d.criticalRate + '</br>'+
+									'PUBLIC HEALTH HAZARD VIOLATION RATE: ' + d.publicRate + '</br>' 
+									)
 								if (d3.event.pageX > (width - 200)) {
 									tooltipFacades.style("left", (d3.event.pageX - 350) + "px");
 								} else {
@@ -586,18 +596,18 @@
 					s3_5Slider = document.querySelector('input[id="chk3_5"]');
 					s6_16Slider = document.querySelector('input[id="chk6_16"]');
 					s0_16Slider = document.querySelector('input[id="chk0_16');
-					<!-- otherSlider = document.querySelector('input[id="chkOther"]'); -->
+				//	otherSlider = document.querySelector('input[id="chkOther"]');
 
 					s0_2Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.ageRange == "Graffiti";
+								return d.ageRange == "0 YEARS - 2 YEARS";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.ageRange == "Graffiti";
+								return d.ageRange == "0 YEARS - 2 YEARS";
 							})
 								.style("display", "none");
 
@@ -607,13 +617,13 @@
 					s2_5Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.ageRange == "Lot Condition";
+								return d.ageRange == "2 YEARS - 5 YEARS";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.ageRange == "Lot Condition";
+								return d.ageRange == "2 YEARS - 5 YEARS";
 							})
 								.style("display", "none");
 
@@ -622,14 +632,14 @@
 
 					s3_5Slider.onchange = function () {
 						if (this.checked) {
-							d3.selectAll(".pointIllegalDumping").filter(function (d) {
-								return d.ageRange == "Illegal Dumping";
+							d3.selectAll(".point3_5").filter(function (d) {
+								return d.ageRange == "3 YEARS - 5 YEARS";
 							})
 								.style("display", "block");
 
 						} else {
-							d3.selectAll(".pointIllegalDumping").filter(function (d) {
-								return d.ageRange == "Illegal Dumping";
+							d3.selectAll(".point3_5").filter(function (d) {
+								return d.ageRange == "3 YEARS - 5 YEARS";
 							})
 								.style("display", "none");
 
@@ -639,13 +649,13 @@
 					s6_16Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.ageRange == "Dirty Condition";
+								return d.ageRange == "6 YEARS - 16 YEARS";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.ageRange == "Dirty Condition";
+								return d.ageRange == "6 YEARS - 16 YEARS";
 							})
 								.style("display", "none");
 
@@ -655,55 +665,60 @@
 					s0_16Slider.onchange = function () {
 						if (this.checked) {
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.ageRange == "Obstruction";
+								return d.ageRange == "0 YEARS - 16 YEARS";
 							})
 								.style("display", "block");
 
 						} else {
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.ageRange == "Obstruction";
+								return d.ageRange == "0 YEARS - 16 YEARS";
 							})
 								.style("display", "none");
 
 						}
 					};
 
-					otherSlider.onchange = function () {
-						if (this.checked) {
-							d3.selectAll(".pointOther").filter(function (d) {
-								return d.ageRange == "Other";
-							})
-								.style("display", "block");
+				//	otherSlider.onchange = function () {
+				//		if (this.checked) {
+				//			d3.selectAll(".pointOther").filter(function (d) {
+				//				return d.ageRange == "Other";
+				//			})
+				//				.style("display", "block");
 
-						} else {
-							d3.selectAll(".pointOther").filter(function (d) {
-								return d.ageRange == "Other";
-							})
-								.style("display", "none");
+				//		} else {
+				//			d3.selectAll(".pointOther").filter(function (d) {
+				//				return d.ageRange == "Other";
+				//			})
+				//				.style("display", "none");
 
-						}
-					};
+				//		}
+				//	};
 
 
 				});
 
-
-
-				d3.csv("data_dc/DOHMH_Childcare_Center.csv", function (data) {
+				d3.csv("/../../data_dc/DOHMH_Childcare_Center.csv", function (data) {
 					points = data.filter(function (d) {
 						if (((+d["latitude"] != 0) && (+d["longitude"] != 0))) {
+							
 							return d;
 						}
 					}).map(function (d) {
 						d.latLng = [+d["latitude"], +d["longitude"]];
+						d.name = d["Center Name"];
 						d.address = d["address"];
 						d.Borough = d["borough"];
 						d.communityBoard = d["cb"];
 						d.ageRange = d["Age Range"];
 						d.worker = d["Total Educational Workers"];
-						d.violationRate = d["Violation Rate Percent"];
+						d.violationRate = d["Violation Rate Percent"] == ""?"":d["Violation Rate Percent"]+"%";
 						d.programType = d["Program Type"];
 						d.childCareType = d["Child Care Type"];
+						d.criticalRate = d["Critical Violation Rate"] == ""?"":d["Critical Violation Rate"]+"%";
+						d.publicRate = d["Public Health Hazard Violation Rate"] == ""?"":d["Public Health Hazard Violation Rate"]+"%";
+						d.link = d["URL"];
+						d.phone = d["Phone"];
+
 						return d;
 					});
 
@@ -711,7 +726,7 @@
 
 					d3.selectAll(".point0_2").style("display", "block");
 					d3.selectAll(".point2_5").style("display", "block");
-					d3.selectAll(".pointIllegalDumping").style("display", "block");
+					d3.selectAll(".point3_5").style("display", "block");
 					d3.selectAll(".point6_16").style("display", "block");
 					d3.selectAll(".point0_16").style("display", "none");
 					d3.selectAll(".pointOther").style("display", "none");
