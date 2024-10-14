@@ -1230,7 +1230,7 @@
 
 				});
 
-				d3.csv("../../data_dc/DOHMH_Childcare_Center.csv", function (data) {
+				d3.csv("https://github.com/data-go-deep/KidsCareScape/blob/gh-pages/data_dc/DOHMH_Childcare_Center.csv", function (data) {
 					points = data.filter(function (d) {
 						if (((+d["latitude"] != 0) && (+d["longitude"] != 0))) {
 							
