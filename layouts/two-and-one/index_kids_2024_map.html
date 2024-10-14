@@ -233,7 +233,7 @@
 
 	.ui {
 		top: 10px;
-		left: 50px;
+		left: 10px;
 		padding: 8px;
 		position: absolute;
 		background: white;
@@ -241,7 +241,7 @@
 		border: 2px solid #707070;
 		box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 		border-radius: 7px;
-		width: 280px;
+		width: 240px;
 	}
 
 
@@ -334,6 +334,38 @@
 		box-shadow: 0 0 1px #999A9C;
 	}
 
+	input:checked+#sliderCamp {
+		background-color: #999A9C;
+	}
+
+	input:focus+#sliderCamp {
+		box-shadow: 0 0 1px #999A9C;
+	}
+
+	input:checked+#sliderSchool {
+		background-color: #999A9C;
+	}
+
+	input:focus+#sliderSchool {
+		box-shadow: 0 0 1px #999A9C;
+	}
+
+	input:checked+#sliderPreschool {
+		background-color: #999A9C;
+	}
+
+	input:focus+#sliderPreschool {
+		box-shadow: 0 0 1px #999A9C;
+	}
+
+	input:checked+#sliderInfant {
+		background-color: #999A9C;
+	}
+
+	input:focus+#sliderInfant {
+		box-shadow: 0 0 1px #999A9C;
+	}
+
 	input:checked+.slider:before {
 		-webkit-transform: translateX(12px);
 		-ms-transform: translateX(12px);
@@ -398,13 +430,49 @@
 
 							<span style="display:inline-block;">
 								<label class="switch">
-									<input type="checkbox" id="chk0_16">
+									<input type="checkbox" checked="true" id="chk0_16">
 									<span class="slider" id="slider0_16"></span>
 								</label>
 								<span class="en" id="sliderTxt">0 - 16 YEARS</span>
 							</span>
-							<br />
+							
+							<h5>CENTER TYPE: </h5>
+							<span style="display:inline-block;">
+								<label class="switch">
+									<input type="checkbox" checked="true" id="chkCamp">
+									<span class="slider" id="sliderCamp"></span>
+								</label>
 
+								<span class="en" id="sliderTxt">Camps</span>
+							</span>
+							
+
+							<span style="display:inline-block;">
+								<label class="switch">
+									<input type="checkbox" checked="true" id="chkSchool">
+									<span class="slider" id="sliderSchool"></span>
+								</label>
+								<span class="en" id="sliderTxt">School</span>
+							</span>
+							
+
+							<span style="display:inline-block;">
+								<label class="switch">
+									<input type="checkbox" checked="true" id="chkPreschool">
+									<span class="slider" id="sliderPreschool"></span>
+								</label>
+								<span class="en" id="sliderTxt">Preschool</span>
+							</span>
+							
+
+							<span style="display:inline-block;">
+								<label class="switch">
+									<input type="checkbox" checked="true" id="chkInfant">
+									<span class="slider" id="sliderInfant"></span>
+								</label>
+								<span class="en" id="sliderTxt">Toddler/Infant</span>
+							</span>
+							
 
 							<!-- <span style="display:inline-block;">
 								<label class="switch">
@@ -420,6 +488,8 @@
 			</div>
 
 		</div>
+		
+		
 	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
@@ -454,6 +524,28 @@
 			var formatDate = d3.time.format("%-m/%-d/%Y").parse;
 			var numberFormat = d3.format(",.0f");
 			var legendNumFormat = d3.format(",");
+			var indexBasePreschool = 1;
+			var indexBaseInfant = 2;
+			var indexBaseCamp = 3;
+			var indexBaseSchool = 4;
+			var indexBase2_5 = 5;
+			var indexBase0_2 = 6;
+			var indexBase0_16 = 7;
+			var indexBase3_5 = 8;
+			var indexBase6_16 = 9;
+			var preschool;
+			var infant;
+			var camp;
+			var school;
+			var s2_5;
+			var s0_2;
+			var s0_16;
+			var s3_5;
+			var s6_16;
+			var index = 0b1111111111111;
+			var ageRangeChk = new Set(['2 YEARS - 5 YEARS','0 YEARS - 2 YEARS', '0 YEARS - 16 YEARS','3 YEARS - 5 YEARS','6 YEARS - 16 YEARS']);
+			var childcareTypeChk = new Set(['Child Care - Pre School','Child Care - Infants/Toddlers','Camp','School Based Child Care']);
+			
 			L.Control.include({
 				_refocusOnMap: L.Util.falseFn // Do nothing.
 			});
@@ -466,8 +558,13 @@
 			
 			var map = L.map('map', {
 				dragging: true,
-				scrollWheelZoom: false
-			}).setView([40.72215448921957, -73.98616799064006], 11);
+				scrollWheelZoom: false,
+				zoomControl: false
+			}).setView([40.72215448921957, -73.98636810864006], 11);
+
+			L.control.zoom({
+				position: 'topright'
+			}).addTo(map);
 			
 			L.tileLayer('http://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}', {
 				maxZoom: 20,
@@ -521,24 +618,60 @@
 						.attr('cx', function (d) { return proj.latLngToLayerPoint(d.latLng).x; })
 						.attr('cy', function (d) { return proj.latLngToLayerPoint(d.latLng).y; })
 						.attr('class', function (d) {
-							switch (d.ageRange) {
-								case '0 YEARS - 2 YEARS':
-									return 'point0_2';
-									break;
-								case '2 YEARS - 5 YEARS':
-									return 'point2_5';
-									break;
-								case '3 YEARS - 5 YEARS':
-									return 'point3_5';
-									break;
-								case '6 YEARS - 16 YEARS':
-									return 'point6_16';
-									break;
-								case '0 YEARS - 16 YEARS':
-									return 'point0_16';
-									break;
+							
+							if(d.ageRange == '0 YEARS - 2 YEARS'){
+								return 'point0_2';
+								
+							} else if (d.ageRange == '2 YEARS - 5 YEARS'){
+								return 'point2_5';
+								
+							} else if (d.ageRange == '3 YEARS - 5 YEARS'){
+								return 'point3_5';
+								
+							} else if (d.ageRange == '6 YEARS - 16 YEARS'){
+								return 'point6_16';
+								
+							} else if (d.ageRange == '0 YEARS - 16 YEARS'){
+								return 'point0_16';
 								
 							}
+						
+							/*
+							if((d.localIndex&32) == 32){
+								return 'point0_2';
+								
+							} else if ((d.localIndex&0b10000) == 0b10000){
+								return 'point2_5';
+								
+							} else if ((d.localIndex&0b10000000) == 0b10000000){
+								return 'point3_5';
+								
+							} else if ((d.localIndex&0b100000000) == 0b100000000){
+								return 'point6_16';
+								
+							} else if ((d.localIndex&0b1000000) == 0b1000000){
+								return 'point0_16';
+								
+							}
+							*/
+						//	switch (d.ageRange) {
+							//	case '0 YEARS - 2 YEARS':
+							//		return 'point0_2';
+							//		break;
+							//	case '2 YEARS - 5 YEARS':
+							//		return 'point2_5';
+							//		break;
+							//	case '3 YEARS - 5 YEARS':
+							//		return 'point3_5';
+							//		break;
+							//	case '6 YEARS - 16 YEARS':
+							//		return 'point6_16';
+							//		break;
+							//	case '0 YEARS - 16 YEARS':
+							//		return 'point0_16';
+							//		break;
+								
+						//	}
 						})
 
 						.on('click', function (d) {
@@ -559,7 +692,8 @@
 									'TOTAL WORKERS: ' + d.worker + '</br>' +
 									'VIOLATION RATE: ' + d.violationRate + '</br>' +
 									'CRITICAL VIOLATION RATE: ' + d.criticalRate + '</br>'+
-									'PUBLIC HEALTH HAZARD VIOLATION RATE: ' + d.publicRate + '</br>' 
+									'PUBLIC HEALTH HAZARD VIOLATION RATE: ' + d.publicRate + '</br>'+
+									'local: ' + Number(d.localIndex).toString(2)
 									)
 								if (d3.event.pageX > (width - 200)) {
 									tooltipFacades.style("left", (d3.event.pageX - 350) + "px");
@@ -595,35 +729,79 @@
 					s2_5Slider = document.querySelector('input[id="chk2_5"]');
 					s3_5Slider = document.querySelector('input[id="chk3_5"]');
 					s6_16Slider = document.querySelector('input[id="chk6_16"]');
-					s0_16Slider = document.querySelector('input[id="chk0_16');
+					s0_16Slider = document.querySelector('input[id="chk0_16"]');
+					sliderCamp = document.querySelector('input[id="chkCamp"]');
+					sliderSchool = document.querySelector('input[id="chkSchool"]');
+					sliderPreschool = document.querySelector('input[id="chkPreschool"]');
+					sliderInfant = document.querySelector('input[id="chkInfant"]');
+
+
 				//	otherSlider = document.querySelector('input[id="chkOther"]');
 
-					s0_2Slider.onchange = function () {
+				/*	s0_2Slider.onchange = function () {
 						if (this.checked) {
+							mask = 1<< (indexBase0_2 - 1);
+							index |= mask;
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.ageRange == "0 YEARS - 2 YEARS";
+								return ((mask)&d.localIndex) == mask;
+								
 							})
 								.style("display", "block");
-
 						} else {
+							mask = ~(1 << indexBase0_2-1);
+							index &= mask;
 							d3.selectAll(".point0_2").filter(function (d) {
-								return d.ageRange == "0 YEARS - 2 YEARS";
+								return ((~mask)&d.localIndex ) == (~mask);
 							})
 								.style("display", "none");
-
+						}
+					};
+					*/
+					s0_2Slider.onchange = function () {
+						if (this.checked) {
+							mask = 1<< (indexBase0_2 - 1);
+							index |= mask;
+							ageRangeChk.add('0 YEARS - 2 YEARS');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 2 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
+								
+							})
+								.style("display", "block");
+						} else {
+							mask = ~(1 << indexBase0_2-1);
+							index &= mask;
+							ageRangeChk.delete('0 YEARS - 2 YEARS');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 2 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "none");
 						}
 					};
 
 					s2_5Slider.onchange = function () {
 						if (this.checked) {
+							
+							mask = 1<< (indexBase2_5 - 1);
+							index |= mask;
+							ageRangeChk.add('2 YEARS - 5 YEARS');
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.ageRange == "2 YEARS - 5 YEARS";
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '2 YEARS - 5 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
 							})
 								.style("display", "block");
 
 						} else {
+							
+							mask = ~(1 << indexBase2_5-1);
+							index &= mask;
+							ageRangeChk.delete('2 YEARS - 5 YEARS');
 							d3.selectAll(".point2_5").filter(function (d) {
-								return d.ageRange == "2 YEARS - 5 YEARS";
+								return (d.ageRange == '2 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
 							})
 								.style("display", "none");
 
@@ -632,14 +810,23 @@
 
 					s3_5Slider.onchange = function () {
 						if (this.checked) {
+							mask = 1<< (indexBase3_5 - 1);
+							index |= mask;
+							ageRangeChk.add('3 YEARS - 5 YEARS');
 							d3.selectAll(".point3_5").filter(function (d) {
-								return d.ageRange == "3 YEARS - 5 YEARS";
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '3 YEARS - 5 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
 							})
 								.style("display", "block");
 
 						} else {
+							mask = ~(1 << indexBase3_5-1);
+							index &= mask;
+							ageRangeChk.delete('3 YEARS - 5 YEARS');
 							d3.selectAll(".point3_5").filter(function (d) {
-								return d.ageRange == "3 YEARS - 5 YEARS";
+								return (d.ageRange == '3 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
 							})
 								.style("display", "none");
 
@@ -648,14 +835,23 @@
 
 					s6_16Slider.onchange = function () {
 						if (this.checked) {
+							mask = 1<< (indexBase6_16 - 1);
+							index |= mask;
+							ageRangeChk.add('6 YEARS - 16 YEARS');
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.ageRange == "6 YEARS - 16 YEARS";
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '6 YEARS - 16 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
 							})
 								.style("display", "block");
 
 						} else {
+							mask = ~(1 << indexBase6_16-1);
+							index &= mask;
+							ageRangeChk.delete('6 YEARS - 16 YEARS');
 							d3.selectAll(".point6_16").filter(function (d) {
-								return d.ageRange == "6 YEARS - 16 YEARS";
+								return (d.ageRange == '6 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
 							})
 								.style("display", "none");
 
@@ -664,17 +860,354 @@
 
 					s0_16Slider.onchange = function () {
 						if (this.checked) {
+							mask = 1<< (indexBase0_16 - 1);
+							index |= mask;
+							ageRangeChk.add('0 YEARS - 16 YEARS');
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.ageRange == "0 YEARS - 16 YEARS";
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 16 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
 							})
 								.style("display", "block");
 
 						} else {
+							mask = ~(1 << indexBase0_16-1);
+							index &= mask;
+							ageRangeChk.delete('0 YEARS - 16 YEARS');
 							d3.selectAll(".point0_16").filter(function (d) {
-								return d.ageRange == "0 YEARS - 16 YEARS";
+								return (d.ageRange == '0 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
 							})
 								.style("display", "none");
 
+						}
+					};
+
+					sliderCamp.onchange = function () {
+						
+						
+						if (this.checked) {
+							mask = 1<< (indexBaseCamp - 1);
+							index |= mask;
+							childcareTypeChk.add('Camp');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 2 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
+							})
+								.style("display", "block");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '2 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '6 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '0 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '3 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");				
+									
+
+						} else {
+							
+							mask = ~(1 << indexBaseCamp-1);
+							index &= mask;
+							childcareTypeChk.delete('Camp');
+							
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 2 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (d.ageRange == '2 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (d.ageRange == '6 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (d.ageRange == '3 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");				
+									
+						}
+					};
+
+					sliderSchool.onchange = function () {
+						
+						
+						if (this.checked) {
+							mask = 1<< (indexBaseCamp - 1);
+							index |= mask;
+							childcareTypeChk.add('School Based Child Care');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 2 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
+							})
+								.style("display", "block");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '2 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '6 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '0 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '3 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");				
+									
+
+						} else {
+							
+							mask = ~(1 << indexBaseCamp-1);
+							index &= mask;
+							childcareTypeChk.delete('School Based Child Care');
+							
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 2 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (d.ageRange == '2 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (d.ageRange == '6 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (d.ageRange == '3 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");				
+									
+						}
+					};
+
+					sliderPreschool.onchange = function () {
+						
+						
+						if (this.checked) {
+							mask = 1<< (indexBaseCamp - 1);
+							index |= mask;
+							childcareTypeChk.add('Child Care - Pre School');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 2 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
+							})
+								.style("display", "block");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '2 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '6 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '0 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '3 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");				
+									
+
+						} else {
+							
+							mask = ~(1 << indexBaseCamp-1);
+							index &= mask;
+							childcareTypeChk.delete('Child Care - Pre School');
+							
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 2 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (d.ageRange == '2 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (d.ageRange == '6 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (d.ageRange == '3 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");				
+									
+						}
+					};
+
+					sliderInfant.onchange = function () {
+						
+						
+						if (this.checked) {
+							mask = 1<< (indexBaseCamp - 1);
+							index |= mask;
+							childcareTypeChk.add('Child Care - Infants/Toddlers');
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+										(d.ageRange == '0 YEARS - 2 YEARS') &&
+										childcareTypeChk.has(d.childCareType));
+							})
+								.style("display", "block");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '2 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '6 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+								.style("display", "block");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '0 YEARS - 16 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (ageRangeChk.has(d.ageRange) &&
+								d.ageRange == '3 YEARS - 5 YEARS' &&
+								(childcareTypeChk.has(d.childCareType)))
+							})
+									.style("display", "block");				
+									
+
+						} else {
+							
+							mask = ~(1 << indexBaseCamp-1);
+							index &= mask;
+							childcareTypeChk.delete('Child Care - Infants/Toddlers');
+							
+							d3.selectAll(".point0_2").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 2 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+							
+							d3.selectAll(".point2_5").filter(function (d) {
+								return (d.ageRange == '2 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point6_16").filter(function (d) {
+								return (d.ageRange == '6 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+								.style("display", "none");
+
+							d3.selectAll(".point0_16").filter(function (d) {
+								return (d.ageRange == '0 YEARS - 16 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");		
+
+							d3.selectAll(".point3_5").filter(function (d) {
+								return (d.ageRange == '3 YEARS - 5 YEARS' &&
+								(!(childcareTypeChk.has(d.childCareType))))
+							})
+									.style("display", "none");				
+									
 						}
 					};
 
@@ -718,6 +1251,7 @@
 						d.publicRate = d["Public Health Hazard Violation Rate"] == ""?"":d["Public Health Hazard Violation Rate"]+"%";
 						d.link = d["URL"];
 						d.phone = d["Phone"];
+						d.localIndex = Number(d["index"]);
 
 						return d;
 					});
@@ -728,8 +1262,9 @@
 					d3.selectAll(".point2_5").style("display", "block");
 					d3.selectAll(".point3_5").style("display", "block");
 					d3.selectAll(".point6_16").style("display", "block");
-					d3.selectAll(".point0_16").style("display", "none");
+					d3.selectAll(".point0_16").style("display", "block");
 					d3.selectAll(".pointOther").style("display", "none");
+
 
 
 
